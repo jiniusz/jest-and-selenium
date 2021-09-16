@@ -1,0 +1,5 @@
+// jest (unit tests)
+npm test
+
+// selenium (integration tests)
+npm run integration-tests
