@@ -1,70 +1,61 @@
-# Getting Started with Create React App
+### Integration tests will be fail
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is happening because we do not clear the database between runs. On each run, the integration tests will create the same tasks and clutter the DB. So when Selenium tries to find a specific task, it may find the old one and fail the test.
 
-## Available Scripts
+To fix this, we will create a *script*. A script is a file where each line is a command for the command prompt. On macOS/Linux systems, `.sh` files and BASH are used, whereas we will use `.bat` files on Windows.
 
-In the project directory, you can run:
+> PowerShell can also be used on Windows, but I think it is overkill for this particular case.
 
-### `npm start`
+If you are on **macOS/Linux**, create a file called `reset-db.sh` in project root with this content:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```
+#!/bin/bash
+rm -f ./db.json
+cp ./db.json.bak ./db.json
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+```
 
-### `npm test`
+If you are on **Windows**, create a file called `reset-db.bat` in project root with this content:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```
+del db.json >nul 2>&1
+echo f | xcopy db.json.bak db.json
 
-### `npm run build`
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Every time you run this script, it will delete the `db.json` file and restore a brand new one from the backup. This means you also need to create a backup. Create a file `db.json.bak` in project root with this content (the initial contents of `db.json`):
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```
+{
+  "tasks": [
+    {
+      "id": 1,
+      "label": "Do this",
+      "completed": false
+    }
+  ]
+}
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
 
-### `npm run eject`
+Try running the script from the command line. Do you see the `db.json` file being restored? Change its contents or delete the file altogether to verify that the script is working.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+To run this script automatically, we will modify the `scripts` section of the `package.json` file. Find the `integration-tests` entry and change it to (macOS/Linux):
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```
+"integration-tests": "reset-db.sh && jest integration-tests && reset-db.sh",
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+Windows:
 
-## Learn More
+```
+"integration-tests": "reset-db.bat && jest integration-tests && reset-db.bat",
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+> There are many ways to achieve cross-platform config here, but they are out of the scope of this course.
 
-### Code Splitting
+Finally, once you have your `npm run json-server` and `npm start` commands running, you can run `npm run integration-tests` and witness all three integration tests passing! Congratulations, give yourself a pat on the back!
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+> There may be an issue with timeouts when you run the integration tests for the very first time. This is happening because JS compiler takes time to produce a build. To get around that, run the tests one more time or add this line to jest.config.bat:
