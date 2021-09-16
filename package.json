@@ -37,7 +37,12 @@
     ]
   },
   "devDependencies": {
+    "@testing-library/react-hooks": "^7.0.2",
     "chromedriver": "^93.0.1",
+    "jest-fetch-mock": "^3.0.3",
     "selenium-webdriver": "^4.0.0-rc-1"
+  },
+  "jest": {
+    "resetMocks": false
   }
 }

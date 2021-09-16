@@ -1,0 +1,10 @@
+npm i selenium-webdriver chromedriver
+npm i -g json-server
+npm i -D jest-fetch-mock
+// add fetchMock.enableMocks(); to setupTests.js
+npm i -D @testing-library/react-hooks
+
+// add this to package.json
+"jest": {
+  "resetMocks": false
+}
