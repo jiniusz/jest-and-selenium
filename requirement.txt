@@ -1,8 +1,9 @@
-npm i selenium-webdriver chromedriver
+npm i --save-dev @testing-library/react
+npm i --save-dev selenium-webdriver chromedriver
 npm i -g json-server
-npm i -D jest-fetch-mock
+npm i --save-dev jest-fetch-mock
 // add fetchMock.enableMocks(); to setupTests.js
-npm i -D @testing-library/react-hooks
+npm i --save-dev @testing-library/react-hooks
 
 // add this to package.json
 "jest": {
